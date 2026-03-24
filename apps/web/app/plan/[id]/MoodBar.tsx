@@ -65,7 +65,7 @@ export function MoodBar({ itineraryId, tripContext, onRefresh }: Props) {
         streamingTextRef.current = ''
         void onRefresh()
       },
-      onError: (err) => {
+      onError: (err: string) => {
         setMessages((prev) => [
           ...prev,
           { role: 'assistant', text: `Error: ${err}` },
