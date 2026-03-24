@@ -1,0 +1,10 @@
+node_modules/
+.next/
+dist/
+.env.local
+.env*.local
+*.tsbuildinfo
+
+# pnpm store (on F drive, but just in case)
+.pnpm-store/
+.pnpm-cache/

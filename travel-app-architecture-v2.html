@@ -1,0 +1,1100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Wayfarer — Full Architecture V2</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f7f4ef;
+    --bg2: #ede9e2;
+    --surface: #ffffff;
+    --border: #ddd8cf;
+    --ink: #1a1814;
+    --ink2: #4a4640;
+    --muted: #9a9490;
+    --accent: #c84b2f;       /* terracotta */
+    --accent2: #2d6a4f;      /* forest */
+    --accent3: #1e3a5f;      /* deep navy */
+    --accent4: #c9a84c;      /* gold */
+    --tag-bg: rgba(200,75,47,0.08);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    line-height: 1.7;
+  }
+
+  /* ── HEADER ── */
+  header {
+    background: var(--ink);
+    color: #f7f4ef;
+    padding: 64px 72px 56px;
+    position: relative;
+    overflow: hidden;
+  }
+  header::after {
+    content: 'ARCHITECTURE';
+    position: absolute;
+    right: 48px; bottom: -16px;
+    font-family: 'DM Serif Display', serif;
+    font-size: 120px;
+    color: rgba(255,255,255,0.03);
+    white-space: nowrap;
+    pointer-events: none;
+    letter-spacing: -2px;
+  }
+  .header-eyebrow {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 20px;
+  }
+  header h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: clamp(36px, 5vw, 64px);
+    font-weight: 400;
+    line-height: 1.05;
+    color: #f7f4ef;
+    max-width: 680px;
+  }
+  header h1 em {
+    color: var(--accent4);
+    font-style: italic;
+  }
+  .header-meta {
+    margin-top: 24px;
+    display: flex;
+    gap: 32px;
+    flex-wrap: wrap;
+  }
+  .meta-item {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .meta-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: rgba(247,244,239,0.3);
+  }
+  .meta-value {
+    font-size: 13px;
+    color: rgba(247,244,239,0.75);
+    font-weight: 500;
+  }
+
+  /* ── LAYOUT ── */
+  .container { max-width: 1080px; margin: 0 auto; padding: 0 72px; }
+
+  /* ── SECTION ── */
+  .section { margin-top: 72px; }
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 28px;
+  }
+  .section-num {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.05em;
+    flex-shrink: 0;
+  }
+  .section-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 26px;
+    font-weight: 400;
+    color: var(--ink);
+    line-height: 1.2;
+  }
+  .section-rule {
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  /* ── CARDS ── */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 24px 28px;
+  }
+  .card + .card { margin-top: 10px; }
+
+  /* ── STACK GRID ── */
+  .stack-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+  }
+  .stack-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px 22px;
+    position: relative;
+    overflow: hidden;
+  }
+  .stack-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+  }
+  .stack-card.color-1::before { background: var(--accent); }
+  .stack-card.color-2::before { background: var(--accent2); }
+  .stack-card.color-3::before { background: var(--accent3); }
+  .stack-card.color-4::before { background: var(--accent4); }
+  .stack-card.color-5::before { background: #7b5ea7; }
+  .stack-card.color-6::before { background: #3a7ca5; }
+  .stack-layer {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 6px;
+  }
+  .stack-tech {
+    font-family: 'DM Serif Display', serif;
+    font-size: 20px;
+    color: var(--ink);
+    margin-bottom: 8px;
+  }
+  .stack-reason {
+    font-size: 12.5px;
+    color: var(--ink2);
+    line-height: 1.55;
+  }
+
+  /* ── FLOW ── */
+  .flow { display: flex; flex-direction: column; }
+  .flow-item {
+    display: grid;
+    grid-template-columns: 40px 1fr;
+    gap: 18px;
+  }
+  .flow-spine { display: flex; flex-direction: column; align-items: center; }
+  .flow-dot {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    border: 2px solid var(--border);
+    background: var(--surface);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--accent);
+    font-weight: 500;
+    flex-shrink: 0;
+    position: relative;
+    z-index: 1;
+  }
+  .flow-dot.active {
+    border-color: var(--accent);
+    background: var(--accent);
+    color: #fff;
+  }
+  .flow-line {
+    width: 1px;
+    flex: 1;
+    background: var(--border);
+    min-height: 28px;
+    margin: 4px 0;
+  }
+  .flow-body { padding-bottom: 28px; }
+  .flow-body h3 {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--ink);
+    margin-top: 5px;
+    margin-bottom: 6px;
+  }
+  .flow-body p { font-size: 13px; color: var(--ink2); line-height: 1.6; }
+  .flow-body code {
+    font-family: 'DM Mono', monospace;
+    font-size: 11.5px;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 1px 6px;
+    color: var(--accent3);
+  }
+  .flow-body .tag-row { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
+  .tag {
+    font-family: 'DM Mono', monospace;
+    font-size: 10.5px;
+    padding: 3px 8px;
+    border-radius: 4px;
+    background: var(--tag-bg);
+    color: var(--accent);
+    border: 1px solid rgba(200,75,47,0.15);
+  }
+  .tag.green {
+    background: rgba(45,106,79,0.08);
+    color: var(--accent2);
+    border-color: rgba(45,106,79,0.15);
+  }
+  .tag.navy {
+    background: rgba(30,58,95,0.08);
+    color: var(--accent3);
+    border-color: rgba(30,58,95,0.15);
+  }
+
+  /* ── CODE BLOCK ── */
+  .code-wrap {
+    background: var(--ink);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  .code-titlebar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 20px;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+  }
+  .code-dot { width: 10px; height: 10px; border-radius: 50%; }
+  .code-dot:nth-child(1) { background: #ff5f57; }
+  .code-dot:nth-child(2) { background: #febc2e; }
+  .code-dot:nth-child(3) { background: #28c840; }
+  .code-filename {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: rgba(247,244,239,0.35);
+    margin-left: 8px;
+  }
+  .code-body {
+    padding: 20px 24px;
+    font-family: 'DM Mono', monospace;
+    font-size: 12.5px;
+    line-height: 1.8;
+    color: #cdd3de;
+    overflow-x: auto;
+    white-space: pre;
+  }
+  .k { color: #e06c75; }
+  .s { color: #98c379; }
+  .c { color: #5c6370; font-style: italic; }
+  .t { color: #61afef; }
+  .n { color: #e5c07b; }
+  .p { color: #abb2bf; }
+
+  /* ── TOOLS ── */
+  .tools-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+  .tool-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 18px 20px;
+  }
+  .tool-emoji { font-size: 22px; margin-bottom: 10px; }
+  .tool-name {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--ink);
+    margin-bottom: 8px;
+  }
+  .tool-desc { font-size: 12px; color: var(--ink2); line-height: 1.55; margin-bottom: 12px; }
+  .tool-in, .tool-out {
+    font-family: 'DM Mono', monospace;
+    font-size: 10.5px;
+    padding: 5px 8px;
+    border-radius: 4px;
+    margin-top: 4px;
+    line-height: 1.4;
+  }
+  .tool-in { background: rgba(201,168,76,0.1); color: #a07a20; border: 1px solid rgba(201,168,76,0.2); }
+  .tool-out { background: rgba(45,106,79,0.1); color: var(--accent2); border: 1px solid rgba(45,106,79,0.2); }
+
+  /* ── DB TABLES ── */
+  .db-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .db-table {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  .db-header {
+    background: var(--ink);
+    padding: 10px 18px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .db-name {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    color: var(--accent4);
+    font-weight: 500;
+  }
+  .db-badge {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    padding: 2px 6px;
+    border-radius: 3px;
+    background: rgba(255,255,255,0.07);
+    color: rgba(247,244,239,0.4);
+    letter-spacing: 0.05em;
+  }
+  .db-row {
+    display: grid;
+    grid-template-columns: 140px 90px 1fr;
+    gap: 0;
+    padding: 7px 18px;
+    border-bottom: 1px solid var(--bg2);
+    align-items: baseline;
+  }
+  .db-row:last-child { border-bottom: none; }
+  .db-col { font-family: 'DM Mono', monospace; font-size: 11.5px; color: #2d6a4f; }
+  .db-type { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--accent); }
+  .db-note { font-size: 11px; color: var(--muted); line-height: 1.4; }
+
+  /* ── MEMORY OBJECT ── */
+  .memory-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .memory-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 18px 22px;
+  }
+  .memory-card h4 {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--ink);
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .memory-card ul { list-style: none; }
+  .memory-card ul li {
+    font-size: 12.5px;
+    color: var(--ink2);
+    padding: 4px 0;
+    padding-left: 14px;
+    position: relative;
+    border-bottom: 1px solid var(--bg2);
+  }
+  .memory-card ul li:last-child { border-bottom: none; }
+  .memory-card ul li::before {
+    content: '·';
+    position: absolute;
+    left: 2px;
+    color: var(--accent4);
+    font-weight: 700;
+  }
+
+  /* ── PHASE TIMELINE ── */
+  .phase-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+  .phase-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px;
+    position: relative;
+  }
+  .phase-num {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .phase-1 .phase-num { color: var(--accent2); }
+  .phase-2 .phase-num { color: var(--accent4); }
+  .phase-3 .phase-num { color: var(--accent); }
+  .phase-4 .phase-num { color: var(--accent3); }
+  .phase-card h3 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 17px;
+    color: var(--ink);
+    margin-bottom: 4px;
+    font-weight: 400;
+  }
+  .phase-time {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--muted);
+    margin-bottom: 14px;
+  }
+  .phase-card ul { list-style: none; }
+  .phase-card ul li {
+    font-size: 12px;
+    color: var(--ink2);
+    padding: 3px 0;
+    padding-left: 14px;
+    position: relative;
+    line-height: 1.5;
+  }
+  .phase-card ul li::before {
+    content: '→';
+    position: absolute;
+    left: 0;
+    font-size: 10px;
+    top: 5px;
+  }
+  .phase-1 li::before { color: var(--accent2); }
+  .phase-2 li::before { color: var(--accent4); }
+  .phase-3 li::before { color: var(--accent); }
+  .phase-4 li::before { color: var(--accent3); }
+
+  /* ── CALLOUT ── */
+  .callout {
+    border-left: 3px solid var(--accent);
+    padding: 14px 20px;
+    background: rgba(200,75,47,0.05);
+    border-radius: 0 8px 8px 0;
+    font-size: 13.5px;
+    color: var(--ink2);
+    line-height: 1.65;
+    margin-top: 16px;
+  }
+  .callout strong { color: var(--accent); }
+  .callout.green {
+    border-left-color: var(--accent2);
+    background: rgba(45,106,79,0.05);
+  }
+  .callout.green strong { color: var(--accent2); }
+  .callout.navy {
+    border-left-color: var(--accent3);
+    background: rgba(30,58,95,0.05);
+  }
+  .callout.navy strong { color: var(--accent3); }
+
+  /* ── SCENARIO BOX ── */
+  .scenario {
+    background: var(--ink);
+    border-radius: 10px;
+    padding: 28px 32px;
+    position: relative;
+    overflow: hidden;
+  }
+  .scenario::before {
+    content: '"';
+    position: absolute;
+    top: -10px; left: 20px;
+    font-family: 'DM Serif Display', serif;
+    font-size: 120px;
+    color: rgba(255,255,255,0.04);
+    line-height: 1;
+  }
+  .scenario-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent4);
+    margin-bottom: 12px;
+  }
+  .scenario-quote {
+    font-family: 'DM Serif Display', serif;
+    font-size: 20px;
+    color: #f7f4ef;
+    font-style: italic;
+    line-height: 1.4;
+    margin-bottom: 20px;
+  }
+  .scenario-steps { display: flex; flex-direction: column; gap: 8px; }
+  .scenario-step {
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+  }
+  .step-arrow {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--accent4);
+    flex-shrink: 0;
+    margin-top: 3px;
+  }
+  .step-text { font-size: 13px; color: rgba(247,244,239,0.65); line-height: 1.55; }
+  .step-text strong { color: rgba(247,244,239,0.9); }
+
+  /* ── COST TABLE ── */
+  .cost-table { width: 100%; border-collapse: collapse; }
+  .cost-table th, .cost-table td {
+    padding: 10px 16px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+    font-size: 13px;
+  }
+  .cost-table th {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+    font-weight: 500;
+    background: var(--bg2);
+  }
+  .cost-free { color: var(--accent2); font-family: 'DM Mono', monospace; font-size: 12px; font-weight: 500; }
+  .cost-paid { color: var(--accent); font-family: 'DM Mono', monospace; font-size: 12px; }
+  .cost-note { color: var(--muted); font-size: 12px; }
+  .cost-total td { background: rgba(45,106,79,0.05); font-weight: 600; }
+
+  /* ── DECISION BOX ── */
+  .decisions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+  .decision {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 18px 22px;
+  }
+  .decision h4 {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--ink);
+    margin-bottom: 8px;
+  }
+  .decision p { font-size: 12.5px; color: var(--ink2); line-height: 1.55; }
+
+  @media (max-width: 900px) {
+    header, .container { padding-left: 24px; padding-right: 24px; }
+    .stack-grid, .tools-grid, .phase-grid { grid-template-columns: 1fr 1fr; }
+    .db-grid, .memory-grid, .decisions { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 600px) {
+    .stack-grid, .tools-grid, .phase-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-eyebrow">Technical Architecture · Version 2 · Solo Build</div>
+  <h1>Building <em>Wayfarer</em><br>The Live Trip Companion</h1>
+  <div class="header-meta">
+    <div class="meta-item">
+      <span class="meta-label">Stack</span>
+      <span class="meta-value">Next.js · Supabase · Claude API · Mapbox</span>
+    </div>
+    <div class="meta-item">
+      <span class="meta-label">Target</span>
+      <span class="meta-value">Web → React Native</span>
+    </div>
+    <div class="meta-item">
+      <span class="meta-label">Mode</span>
+      <span class="meta-value">Solo Founder · Ship in 8 weeks</span>
+    </div>
+    <div class="meta-item">
+      <span class="meta-label">V1 Cost</span>
+      <span class="meta-value">~$0 to validate</span>
+    </div>
+  </div>
+</header>
+
+<div class="container">
+
+  <!-- 01 STACK -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-num">01</span>
+      <h2 class="section-title">The Stack</h2>
+      <div class="section-rule"></div>
+    </div>
+    <div class="stack-grid">
+      <div class="stack-card color-1">
+        <div class="stack-layer">Frontend</div>
+        <div class="stack-tech">Next.js 14</div>
+        <div class="stack-reason">App Router + server components. Your business logic stays in hooks that React Native will reuse later. Deploy to Vercel, zero DevOps.</div>
+      </div>
+      <div class="stack-card color-2">
+        <div class="stack-layer">Backend + DB + Auth</div>
+        <div class="stack-tech">Supabase</div>
+        <div class="stack-reason">Postgres under the hood (familiar). Row-level security handles auth. Realtime subscriptions power live trip updates. Replaces 3 separate AWS services.</div>
+      </div>
+      <div class="stack-card color-3">
+        <div class="stack-layer">Map</div>
+        <div class="stack-tech">Mapbox GL JS</div>
+        <div class="stack-reason">Custom styling, live route lines, cluster pins by day. React Native Maps uses the same Mapbox SDK. Design once, works on both.</div>
+      </div>
+      <div class="stack-card color-4">
+        <div class="stack-layer">AI Orchestrator</div>
+        <div class="stack-tech">Claude API</div>
+        <div class="stack-reason">Tool use for the 4-tool architecture. Haiku for quick mood updates, Sonnet for full itinerary generation. Streaming keeps UI responsive.</div>
+      </div>
+      <div class="stack-card color-5">
+        <div class="stack-layer">Drag & Drop</div>
+        <div class="stack-tech">dnd-kit</div>
+        <div class="stack-reason">Lightweight, accessible. Fractional position ordering (1.5 between 1 and 2) means no full re-index on every drag. Same logic ports to React Native Reanimated later.</div>
+      </div>
+      <div class="stack-card color-6">
+        <div class="stack-layer">Hosting</div>
+        <div class="stack-tech">Vercel + Supabase Cloud</div>
+        <div class="stack-reason">Both free to start. Edge Functions for streaming AI. When you move to AWS later, Supabase can self-host on RDS — you own the Postgres data either way.</div>
+      </div>
+    </div>
+    <div class="callout green" style="margin-top:12px;">
+      <strong>On AWS migration later:</strong> Supabase is self-hostable on your own RDS + EC2. When you eventually move to AWS, you're not throwing away your data model — you're just moving where Postgres lives. Start fast now, migrate when you have users and money.
+    </div>
+  </div>
+
+  <!-- 02 TWO MODES -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-num">02</span>
+      <h2 class="section-title">Two Distinct Modes</h2>
+      <div class="section-rule"></div>
+    </div>
+    <div class="decisions">
+      <div class="decision">
+        <h4>🗓 Planning Mode</h4>
+        <p>User hasn't left yet. They input destination, dates, hotel (optional). AI generates full itinerary using Reddit + Google data. User can drag-drop, ask AI to swap things, customize. Shareable link. This is the web-first feature.</p>
+      </div>
+      <div class="decision">
+        <h4>🧭 Companion Mode</h4>
+        <p>Trip has started. App knows what day it is, what's next, where the hotel is. User sends natural language updates ("pizza tonight", "skip the museum, it's raining"). AI edits the live itinerary with context. This is where mobile matters most — design for it even in V1.</p>
+      </div>
+    </div>
+    <div class="callout navy" style="margin-top:12px;">
+      <strong>Key design decision:</strong> These two modes share the same itinerary data structure and the same 4 tools. The difference is the <strong>trip_context</strong> object that gets passed to Claude — in Companion Mode it includes today's date, current day number, last visited place, and user memory. In Planning Mode this object is empty.
+    </div>
+  </div>
+
+  <!-- 03 HOTEL AWARE -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-num">03</span>
+      <h2 class="section-title">Hotel-Aware Routing</h2>
+      <div class="section-rule"></div>
+    </div>
+    <div class="flow">
+      <div class="flow-item">
+        <div class="flow-spine"><div class="flow-dot active">1</div><div class="flow-line"></div></div>
+        <div class="flow-body">
+          <h3>Initial generation — no hotel</h3>
+          <p>User types "Pondicherry, 3 days". AI generates itinerary using city center as the default anchor. Places are clustered geographically. Itinerary is saved and displayed.</p>
+          <div class="tag-row"><span class="tag">anchor: city center</span><span class="tag">clustering: k-means by lat/lng</span></div>
+        </div>
+      </div>
+      <div class="flow-item">
+        <div class="flow-spine"><div class="flow-dot active">2</div><div class="flow-line"></div></div>
+        <div class="flow-body">
+          <h3>User adds hotel</h3>
+          <p>User types hotel name → <code>lookup_place</code> finds it → lat/lng stored in <code>itineraries.hotel_lat/lng</code>. UI shows a prompt: <em>"We found your hotel. Want us to re-optimize each day's routing around it?"</em></p>
+          <div class="tag-row"><span class="tag">trigger: hotel_added event</span><span class="tag navy">updates: itinerary.hotel_place_id</span></div>
+        </div>
+      </div>
+      <div class="flow-item">
+        <div class="flow-spine"><div class="flow-dot active">3</div><div class="flow-line"></div></div>
+        <div class="flow-body">
+          <h3>Re-optimization pass</h3>
+          <p>Claude is called with the existing itinerary + hotel coordinates. System prompt instructs: <em>"Re-order each day so morning starts closest to hotel, and the day's final stop is within 1km of hotel. Minimize total walking distance."</em> Only position/order changes — no places swapped unless Claude finds a clearly better nearby option.</p>
+          <div class="tag-row"><span class="tag">operation: reorder_only</span><span class="tag green">shows: "saved 2.4km of walking on Day 2"</span></div>
+        </div>
+      </div>
+      <div class="flow-item">
+        <div class="flow-spine"><div class="flow-dot">4</div></div>
+        <div class="flow-body">
+          <h3>Map updates</h3>
+          <p>Map re-renders with hotel pin (distinct icon), route lines updated per day. Each day's route now naturally starts and ends near hotel. User can still drag to override.</p>
+          <div class="tag-row"><span class="tag">hotel pin: always visible, distinct color</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 04 REAL TIME MOOD -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-num">04</span>
+      <h2 class="section-title">Real-Time Mood Updates</h2>
+      <div class="section-rule"></div>
+    </div>
+
+    <div class="scenario">
+      <div class="scenario-label">Live scenario · Day 2, 4:30pm, Pondicherry</div>
+      <div class="scenario-quote">"I'm in the mood for pizza tonight. Add a place that serves good Neapolitan."</div>
+      <div class="scenario-steps">
+        <div class="scenario-step">
+          <span class="step-arrow">01 →</span>
+          <span class="step-text">Claude receives message + <strong>trip_context</strong>: current day = 2, next stop = Serenity Beach, hotel = Villa Shanti (lat/lng known), time = 4:30pm</span>
+        </div>
+        <div class="scenario-step">
+          <span class="step-arrow">02 →</span>
+          <span class="step-text">Calls <code>search_google_places</code> with: <strong>type = restaurant, keyword = "Neapolitan pizza wood-fired", location = last stop lat/lng, radius = 2km</strong>. Returns ranked list with distances.</span>
+        </div>
+        <div class="scenario-step">
+          <span class="step-arrow">03 →</span>
+          <span class="step-text">Claude evaluates results. Finds two options: <strong>Option A</strong> — 5 min from Serenity Beach, rating 4.3. <strong>Option B</strong> — 20 min away, rating 4.7, frequently mentioned on Reddit r/Pondicherry.</span>
+        </div>
+        <div class="scenario-step">
+          <span class="step-arrow">04 →</span>
+          <span class="step-text">UI shows the trade-off explicitly — <em>"Option A is 5 min away, Option B is 20 min but Redditors love it."</em> User picks. Not hidden, not automatic. Respects user intelligence.</span>
+        </div>
+        <div class="scenario-step">
+          <span class="step-arrow">05 →</span>
+          <span class="step-text">Calls <code>update_itinerary</code> → adds dinner slot to Day 2 → map pin appears → preference <code>likes_pizza</code> written to user memory object.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 05 THE 4 TOOLS -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-num">05</span>
+      <h2 class="section-title">The Four Tools</h2>
+      <div class="section-rule"></div>
+    </div>
+    <div class="tools-grid">
+      <div class="tool-card">
+        <div class="tool-emoji">🔍</div>
+        <div class="tool-name">search_reddit</div>
+        <div class="tool-desc">Pulls trip reports, hidden gems, and opinions from relevant subreddits. Cached 48hrs. The quality differentiator.</div>
+        <div class="tool-in">IN: destination, queries[], limit</div>
+        <div class="tool-out">OUT: posts[], comments[], upvotes</div>
+      </div>
+      <div class="tool-card">
+        <div class="tool-emoji">📍</div>
+        <div class="tool-name">lookup_place</div>
+        <div class="tool-desc">Google Places lookup. Validates existence, gets lat/lng, hours, rating, price level, photo. Used for hotel lookup too.</div>
+        <div class="tool-in">IN: name, city, type?</div>
+        <div class="tool-out">OUT: lat, lng, hours, rating, place_id, photo_url</div>
+      </div>
+      <div class="tool-card">
+        <div class="tool-emoji">🗺️</div>
+        <div class="tool-name">search_nearby</div>
+        <div class="tool-desc">NEW. Finds places near a given lat/lng. Used for real-time mood requests — "pizza near my last stop". Returns ranked by distance + rating.</div>
+        <div class="tool-in">IN: lat, lng, radius_km, keyword, type</div>
+        <div class="tool-out">OUT: places[] with distance, rating, open_now</div>
+      </div>
+      <div class="tool-card">
+        <div class="tool-emoji">✏️</div>
+        <div class="tool-name">update_itinerary</div>
+        <div class="tool-desc">Creates, reorders, or patches an itinerary. Supports operations: generate, reorder, add_item, remove_item, swap_item. Triggers frontend re-render.</div>
+        <div class="tool-in">IN: itinerary_id, operation, payload</div>
+        <div class="tool-out">OUT: updated itinerary_id, changed days[]</div>
+      </div>
+    </div>
+    <div class="callout" style="margin-top:12px;">
+      <strong>Why 4 tools instead of 3:</strong> <code>search_nearby</code> is split from <code>lookup_place</code> because they serve different purposes. Lookup validates a known place. Nearby discovers unknown candidates. Claude needs both to handle mood requests intelligently — it searches nearby first, then lookups the winners to confirm details.
+    </div>
+  </div>
+
+  <!-- 06 MEMORY OBJECT -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-num">06</span>
+      <h2 class="section-title">The Trip Context + Memory Object</h2>
+      <div class="section-rule"></div>
+    </div>
+    <p style="color: var(--ink2); margin-bottom: 16px; font-size: 13.5px;">Every AI call in Companion Mode includes this object. It's what makes the app feel like it <em>knows you</em>. Stored in Supabase, updated after each interaction.</p>
+
+    <div class="code-wrap">
+      <div class="code-titlebar">
+        <div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div>
+        <span class="code-filename">trip_context.ts — passed with every Claude call during active trip</span>
+      </div>
+      <div class="code-body"><span class="k">type</span> <span class="t">TripContext</span> = {
+  <span class="c">// LIVE STATE — changes daily</span>
+  current_day: <span class="t">number</span>            <span class="c">// derived from trip start date</span>
+  trip_start_date: <span class="t">string</span>       <span class="c">// "2025-02-01"</span>
+  todays_date: <span class="t">string</span>           <span class="c">// injected at call time</span>
+  last_completed_stop: <span class="t">PlaceRef</span>  <span class="c">// { name, lat, lng }</span>
+  next_planned_stop: <span class="t">PlaceRef</span>
+
+  <span class="c">// ANCHORS — set once</span>
+  hotel: <span class="t">PlaceRef</span> | <span class="k">null</span>
+  destination: <span class="t">string</span>           <span class="c">// "Pondicherry"</span>
+
+  <span class="c">// PREFERENCES — grow over trip</span>
+  food_preferences: {
+    dietary: <span class="t">string</span>[]           <span class="c">// ["vegetarian"]</span>
+    cuisines_liked: <span class="t">string</span>[]     <span class="c">// ["neapolitan", "south indian"]</span>
+    cuisines_skipped: <span class="t">string</span>[]   <span class="c">// ["chinese"]</span>
+    price_range: <span class="t">string</span>          <span class="c">// "mid" | "budget" | "splurge"</span>
+  }
+  activity_preferences: {
+    pace: <span class="t">string</span>               <span class="c">// "relaxed" | "packed"</span>
+    liked_categories: <span class="t">string</span>[]  <span class="c">// ["beach", "heritage", "cafes"]</span>
+    skipped_places: <span class="t">string</span>[]    <span class="c">// place_ids user removed</span>
+  }
+
+  <span class="c">// HISTORY — appended each interaction</span>
+  completed_stops: <span class="t">PlaceRef</span>[]
+  mood_updates: <span class="t">MoodUpdate</span>[]    <span class="c">// { time, message, action_taken }</span>
+}</div>
+    </div>
+
+    <div class="memory-grid" style="margin-top: 10px;">
+      <div class="memory-card">
+        <h4>🧠 How preferences are learned</h4>
+        <ul>
+          <li>User removes a meat restaurant → <code>dietary: ["vegetarian"]</code> inferred</li>
+          <li>User adds pizza request → <code>cuisines_liked: ["neapolitan"]</code> added</li>
+          <li>User drags beach to morning every day → <code>liked_categories: ["beach"]</code>, time preference noted</li>
+          <li>User skips a museum → <code>skipped_places[]</code>, less museum suggestions</li>
+          <li>User consistently picks closer options → <code>pace: "relaxed"</code></li>
+        </ul>
+      </div>
+      <div class="memory-card">
+        <h4>⚡ How it's used in the prompt</h4>
+        <ul>
+          <li>Injected into system prompt as JSON before each call</li>
+          <li>Claude told: <em>"Use these preferences to filter and rank all suggestions"</em></li>
+          <li>Updated in Supabase after each tool call that changes preferences</li>
+          <li>Never shown raw to user — expressed as "based on your trip so far..."</li>
+          <li>Resets per trip, not per user (so next trip starts fresh)</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- 07 DB SCHEMA -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-num">07</span>
+      <h2 class="section-title">Database Schema</h2>
+      <div class="section-rule"></div>
+    </div>
+    <div class="db-grid">
+      <div class="db-table">
+        <div class="db-header"><span class="db-name">itineraries</span><span class="db-badge">CORE</span></div>
+        <div class="db-row"><span class="db-col">id</span><span class="db-type">uuid PK</span><span class="db-note">auto-generated</span></div>
+        <div class="db-row"><span class="db-col">user_id</span><span class="db-type">uuid?</span><span class="db-note">null = anonymous, FK → users</span></div>
+        <div class="db-row"><span class="db-col">destination</span><span class="db-type">text</span><span class="db-note">"Pondicherry"</span></div>
+        <div class="db-row"><span class="db-col">trip_start_date</span><span class="db-type">date?</span><span class="db-note">null until trip starts</span></div>
+        <div class="db-row"><span class="db-col">duration_days</span><span class="db-type">int</span><span class="db-note"></span></div>
+        <div class="db-row"><span class="db-col">hotel_place_id</span><span class="db-type">text?</span><span class="db-note">Google place_id of hotel</span></div>
+        <div class="db-row"><span class="db-col">hotel_lat / hotel_lng</span><span class="db-type">float?</span><span class="db-note">for routing calculations</span></div>
+        <div class="db-row"><span class="db-col">share_token</span><span class="db-type">text</span><span class="db-note">unique short ID for /share/[token]</span></div>
+        <div class="db-row"><span class="db-col">status</span><span class="db-type">text</span><span class="db-note">"planning" | "active" | "completed"</span></div>
+        <div class="db-row"><span class="db-col">trip_context</span><span class="db-type">jsonb</span><span class="db-note">the memory object, updated live</span></div>
+        <div class="db-row"><span class="db-col">created_at</span><span class="db-type">timestamptz</span><span class="db-note"></span></div>
+      </div>
+      <div class="db-table">
+        <div class="db-header"><span class="db-name">itinerary_items</span><span class="db-badge">CORE</span></div>
+        <div class="db-row"><span class="db-col">id</span><span class="db-type">uuid PK</span><span class="db-note"></span></div>
+        <div class="db-row"><span class="db-col">itinerary_id</span><span class="db-type">uuid</span><span class="db-note">FK → itineraries</span></div>
+        <div class="db-row"><span class="db-col">day_number</span><span class="db-type">int</span><span class="db-note">1, 2, 3...</span></div>
+        <div class="db-row"><span class="db-col">position</span><span class="db-type">float</span><span class="db-note">fractional — 1.5 between 1 and 2</span></div>
+        <div class="db-row"><span class="db-col">place_name</span><span class="db-type">text</span><span class="db-note"></span></div>
+        <div class="db-row"><span class="db-col">lat / lng</span><span class="db-type">float</span><span class="db-note">for map pins</span></div>
+        <div class="db-row"><span class="db-col">google_place_id</span><span class="db-type">text</span><span class="db-note">for live details lookup</span></div>
+        <div class="db-row"><span class="db-col">reddit_source_url</span><span class="db-type">text?</span><span class="db-note">link to source post</span></div>
+        <div class="db-row"><span class="db-col">time_of_day</span><span class="db-type">text</span><span class="db-note">morning / afternoon / evening</span></div>
+        <div class="db-row"><span class="db-col">duration_mins</span><span class="db-type">int</span><span class="db-note">estimated time at location</span></div>
+        <div class="db-row"><span class="db-col">ai_note</span><span class="db-type">text</span><span class="db-note">"locals say arrive before 6am"</span></div>
+        <div class="db-row"><span class="db-col">category</span><span class="db-type">text</span><span class="db-note">beach / food / heritage / cafe...</span></div>
+        <div class="db-row"><span class="db-col">visited_at</span><span class="db-type">timestamptz?</span><span class="db-note">set when user marks visited</span></div>
+        <div class="db-row"><span class="db-col">added_by</span><span class="db-type">text</span><span class="db-note">"ai" | "user" | "mood_update"</span></div>
+      </div>
+      <div class="db-table">
+        <div class="db-header"><span class="db-name">reddit_cache</span><span class="db-badge">PERFORMANCE</span></div>
+        <div class="db-row"><span class="db-col">id</span><span class="db-type">uuid PK</span><span class="db-note"></span></div>
+        <div class="db-row"><span class="db-col">query_hash</span><span class="db-type">text</span><span class="db-note">MD5 of destination+query string</span></div>
+        <div class="db-row"><span class="db-col">destination</span><span class="db-type">text</span><span class="db-note"></span></div>
+        <div class="db-row"><span class="db-col">results</span><span class="db-type">jsonb</span><span class="db-note">raw Reddit API response</span></div>
+        <div class="db-row"><span class="db-col">cached_at</span><span class="db-type">timestamptz</span><span class="db-note">expire after 48hrs</span></div>
+        <div class="db-row"><span class="db-col">hit_count</span><span class="db-type">int</span><span class="db-note">track popular destinations</span></div>
+      </div>
+      <div class="db-table">
+        <div class="db-header"><span class="db-name">mood_updates</span><span class="db-badge">COMPANION</span></div>
+        <div class="db-row"><span class="db-col">id</span><span class="db-type">uuid PK</span><span class="db-note"></span></div>
+        <div class="db-row"><span class="db-col">itinerary_id</span><span class="db-type">uuid</span><span class="db-note">FK → itineraries</span></div>
+        <div class="db-row"><span class="db-col">day_number</span><span class="db-type">int</span><span class="db-note"></span></div>
+        <div class="db-row"><span class="db-col">user_message</span><span class="db-type">text</span><span class="db-note">"pizza tonight neapolitan"</span></div>
+        <div class="db-row"><span class="db-col">action_taken</span><span class="db-type">text</span><span class="db-note">"added_item" | "swapped" | "removed"</span></div>
+        <div class="db-row"><span class="db-col">affected_item_id</span><span class="db-type">uuid?</span><span class="db-note">FK → itinerary_items</span></div>
+        <div class="db-row"><span class="db-col">created_at</span><span class="db-type">timestamptz</span><span class="db-note"></span></div>
+      </div>
+    </div>
+    <div class="callout green" style="margin-top: 12px;">
+      <strong>trip_context as JSONB:</strong> Store the entire memory object as a single JSONB column on the itinerary row. Don't over-normalize this early. You'll iterate on what you track — JSONB lets you add fields without migrations. When you know exactly what you need, normalize the important bits.
+    </div>
+  </div>
+
+  <!-- 08 FRONTEND STRUCTURE -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-num">08</span>
+      <h2 class="section-title">Frontend Structure (React Native Ready)</h2>
+      <div class="section-rule"></div>
+    </div>
+    <div class="code-wrap">
+      <div class="code-titlebar">
+        <div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div>
+        <span class="code-filename">project structure — shared hooks pattern</span>
+      </div>
+      <div class="code-body"><span class="c">// Everything in /packages/core is shared between web and mobile</span>
+
+<span class="n">packages/</span>
+├── <span class="n">core/</span>                     <span class="c">← Shared business logic (no JSX)</span>
+│   ├── <span class="t">hooks/</span>
+│   │   ├── <span class="t">useItinerary.ts</span>   <span class="c">← CRUD, reordering, optimistic updates</span>
+│   │   ├── <span class="t">useTripContext.ts</span>  <span class="c">← Live trip state, current day calc</span>
+│   │   ├── <span class="t">useAIUpdate.ts</span>    <span class="c">← Streaming AI calls, tool execution</span>
+│   │   └── <span class="t">useMemory.ts</span>      <span class="c">← Read/write trip_context preferences</span>
+│   ├── <span class="t">api/</span>
+│   │   ├── <span class="t">supabase.ts</span>       <span class="c">← Supabase client (same client, both platforms)</span>
+│   │   └── <span class="t">claude.ts</span>         <span class="c">← AI call wrapper with streaming</span>
+│   └── <span class="t">types/</span>
+│       └── <span class="t">index.ts</span>          <span class="c">← TripContext, Itinerary, ItineraryItem types</span>
+│
+<span class="n">apps/web/</span>                     <span class="c">← Next.js app</span>
+│   ├── <span class="t">app/page.tsx</span>           <span class="c">← Landing — destination search</span>
+│   ├── <span class="t">app/plan/[id]/page.tsx</span> <span class="c">← Split: Map (60%) + Panel (40%)</span>
+│   │   ├── <span class="t">MapView.tsx</span>        <span class="c">← Mapbox, pins by day color, hotel pin, routes</span>
+│   │   ├── <span class="t">ItineraryPanel.tsx</span> <span class="c">← dnd-kit, day groups, place cards</span>
+│   │   ├── <span class="t">HotelInput.tsx</span>     <span class="c">← Search + confirm + trigger re-optimize</span>
+│   │   └── <span class="t">MoodBar.tsx</span>        <span class="c">← "What do you feel like?" input, bottom of panel</span>
+│   └── <span class="t">app/api/</span>
+│       ├── <span class="t">generate/route.ts</span>  <span class="c">← Streaming: full itinerary generation</span>
+│       ├── <span class="t">update/route.ts</span>    <span class="c">← Streaming: mood updates + edits</span>
+│       └── <span class="t">tools/</span>
+│           ├── <span class="t">reddit.ts</span>      <span class="c">← Reddit API + cache check/write</span>
+│           ├── <span class="t">places.ts</span>      <span class="c">← Google Places lookup</span>
+│           └── <span class="t">nearby.ts</span>      <span class="c">← Google Places nearby search</span>
+│
+<span class="n">apps/mobile/</span>                  <span class="c">← React Native (future)</span>
+    ├── <span class="t">screens/PlanScreen.tsx</span> <span class="c">← Imports useItinerary from core ✓</span>
+    └── <span class="t">screens/TripScreen.tsx</span> <span class="c">← Companion mode, imports useTripContext ✓</span></div>
+    </div>
+    <div class="callout" style="margin-top: 12px;">
+      <strong>The monorepo pattern:</strong> Use a simple monorepo with <code>packages/core</code> for shared logic. Your hooks (useItinerary, useTripContext) work identically on web and mobile — only the UI components differ. When you start React Native, 60% of your logic is already written. Use <code>pnpm workspaces</code> — no need for Turborepo or Nx at solo scale.
+    </div>
+  </div>
+
+  <!-- 09 BUILD ORDER -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-num">09</span>
+      <h2 class="section-title">Build Order</h2>
+      <div class="section-rule"></div>
+    </div>
+    <div class="phase-grid">
+      <div class="phase-card phase-1">
+        <div class="phase-num">Phase 1</div>
+        <h3>The Core Loop</h3>
+        <div class="phase-time">Weeks 1–3</div>
+        <ul>
+          <li>Supabase project + schema</li>
+          <li>Claude API + 4 tools wired up</li>
+          <li>Reddit API wrapper + cache</li>
+          <li>Google Places wrapper</li>
+          <li>Basic itinerary JSON end-to-end</li>
+          <li>Streaming responses working</li>
+          <li>Ugly UI is fine here</li>
+        </ul>
+      </div>
+      <div class="phase-card phase-2">
+        <div class="phase-num">Phase 2</div>
+        <h3>Planning Mode</h3>
+        <div class="phase-time">Weeks 4–6</div>
+        <ul>
+          <li>Mapbox map + day-colored pins</li>
+          <li>Itinerary panel + dnd-kit</li>
+          <li>Hotel input + re-optimize</li>
+          <li>Shareable link</li>
+          <li>Supabase Auth (email magic link)</li>
+          <li>Save to account</li>
+          <li>Mobile responsive layout</li>
+        </ul>
+      </div>
+      <div class="phase-card phase-3">
+        <div class="phase-num">Phase 3</div>
+        <h3>Companion Mode</h3>
+        <div class="phase-time">Weeks 7–9</div>
+        <ul>
+          <li>Trip start date → active mode</li>
+          <li>Day counter + progress UI</li>
+          <li>MoodBar for live updates</li>
+          <li>trip_context object live</li>
+          <li>Preference learning from actions</li>
+          <li>"Mark as visited" on stops</li>
+          <li>Near-me suggestions</li>
+        </ul>
+      </div>
+      <div class="phase-card phase-4">
+        <div class="phase-num">Phase 4</div>
+        <h3>Ship + Learn</h3>
+        <div class="phase-time">Week 10</div>
+        <ul>
+          <li>Post to r/solotravel, r/travel</li>
+          <li>Post on IndieHackers</li>
+          <li>Watch real usage with Posthog</li>
+          <li>Set success metric (50 itineraries created by strangers)</li>
+          <li>Decide: social layer or mobile next?</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- 10 COST -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-num">10</span>
+      <h2 class="section-title">Running Cost</h2>
+      <div class="section-rule"></div>
+    </div>
+    <div class="card" style="padding: 0; overflow: hidden;">
+      <table class="cost-table">
+        <tr><th>Service</th><th>What you get free</th><th>Your cost at 1k users/mo</th><th>Notes</th></tr>
+        <tr>
+          <td>Vercel</td>
+          <td class="cost-free">Free forever</td>
+          <td class="cost-free">$0</td>
+          <td class="cost-note">Edge Functions for AI streaming included</td>
+        </tr>
+        <tr>
+          <td>Supabase</td>
+          <td class="cost-free">500MB DB, 50k MAU</td>
+          <td class="cost-free">$0</td>
+          <td class="cost-note">Generous free tier, $25/mo Pro when needed</td>
+        </tr>
+        <tr>
+          <td>Mapbox</td>
+          <td class="cost-free">50k map loads/mo</td>
+          <td class="cost-free">$0</td>
+          <td class="cost-note">1k users × ~5 sessions = 5k loads, well within free</td>
+        </tr>
+        <tr>
+          <td>Google Places API</td>
+          <td class="cost-free">$200 credit/mo</td>
+          <td class="cost-free">~$0</td>
+          <td class="cost-note">Cache aggressively. Same city = reuse results</td>
+        </tr>
+        <tr>
+          <td>Claude API (Haiku)</td>
+          <td>—</td>
+          <td class="cost-paid">~$2–5</td>
+          <td class="cost-note">~$0.002 per generation, mood updates cheaper</td>
+        </tr>
+        <tr>
+          <td>Reddit API</td>
+          <td class="cost-free">100 req/min free</td>
+          <td class="cost-free">$0</td>
+          <td class="cost-note">48hr cache means maybe 20 real API calls/day</td>
+        </tr>
+        <tr class="cost-total">
+          <td>Total</td>
+          <td class="cost-free">All free to start</td>
+          <td class="cost-paid">~$5–10/mo</td>
+          <td class="cost-note">Validate completely, then optimize</td>
+        </tr>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<div style="height: 80px;"></div>
+</body>
+</html>
