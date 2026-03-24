@@ -263,7 +263,7 @@ export default function PlanPage() {
 
         {/* Resize handle */}
         <div
-          onMouseDown={(e: MouseEvent) => {
+          onMouseDown={(e: React.MouseEvent) => {
             isDraggingPanel.current = true
             dragStartX.current = e.clientX
             dragStartWidth.current = panelWidth
