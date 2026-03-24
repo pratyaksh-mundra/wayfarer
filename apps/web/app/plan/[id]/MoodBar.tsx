@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
-import { useAIUpdate } from '@wayfarer/core/hooks/useAIUpdate'
+import { useAIUpdate, type StreamChunk } from '@wayfarer/core/hooks/useAIUpdate'
 import type { TripContext } from '@wayfarer/core/types'
 
 type Message = {
@@ -44,7 +44,7 @@ export function MoodBar({ itineraryId, tripContext, onRefresh }: Props) {
     const history = messages.slice(-6).map((m) => ({ role: m.role, content: m.text }))
 
     await update(itineraryId, msg, tripContext, {
-      onChunk: (chunk) => {
+      onChunk: (chunk: StreamChunk) => {
         if (chunk.type === 'text') {
           streamingTextRef.current += chunk.text
           setStreamingText(streamingTextRef.current)
